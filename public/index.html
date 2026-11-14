@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Daniel Quintanilla | Fred Haas Nissan | Book a time</title>
+<meta name="description" content="Confirm availability, schedule a test drive, or get your trade-in value with Daniel Quintanilla at Fred Haas Nissan in Tomball, TX.">
+<meta property="og:title" content="Daniel Quintanilla, Fred Haas Nissan">
+<meta property="og:description" content="Confirm availability, schedule a test drive, or get your trade-in value. Daniel replies personally.">
+<meta name="theme-color" content="#111">
+<style>
+*{box-sizing:border-box}html,body{margin:0}body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:#f3f4f6;color:#111;line-height:1.4}
+.top{background:#111;color:#fff;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.top b{font-size:16px;display:block}.top small{color:#bbb;font-size:12px}
+.top a{color:#fff;background:#c3002f;padding:9px 12px;border-radius:999px;text-decoration:none;font-weight:600;font-size:13px;white-space:nowrap}
+.wrap{max-width:480px;margin:0 auto;padding:16px}
+.box{background:#fff;border-radius:14px;box-shadow:0 1px 3px rgba(0,0,0,.08);padding:18px}
+.box h1{font-size:20px;margin:0 0 4px}.stk{color:#666;font-size:13px;margin:0 0 14px}
+.btn{display:block;width:100%;border:0;border-radius:10px;padding:15px;font-size:16px;font-weight:700;cursor:pointer;margin:10px 0;text-align:center;text-decoration:none}
+.p{background:#111;color:#fff}.o{background:#fff;color:#111;border:2px solid #111}.g{background:#f3f4f6;color:#111}
+.es{font-size:14px;color:#444;background:#fff7e6;border-radius:10px;padding:10px 12px;margin:14px 0 0}
+.who{font-size:13px;color:#555;margin:16px 4px}
+form{display:none}form.on{display:block}
+label{display:block;font-size:13px;font-weight:600;margin:12px 0 4px}
+input,select,textarea{width:100%;font-size:16px;padding:11px;border:1px solid #ccc;border-radius:8px;background:#fff;font-family:inherit}
+.row{display:flex;gap:10px}.row>div{flex:1}
+.hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
+.back{background:none;border:0;color:#555;font-size:14px;padding:0;cursor:pointer;margin-bottom:6px}
+.ok{display:none;text-align:center}.ok.on{display:block}.ok h2{margin:6px 0}
+.err{color:#b00020;font-size:14px;margin-top:8px;display:none}.err.on{display:block}
+.fine{font-size:12px;color:#777;margin-top:10px}
+footer{text-align:center;font-size:12px;color:#777;padding:10px 16px 30px}footer a{color:#555}
+</style>
+</head>
+<body>
+<header class="top"><div><b>Daniel Quintanilla</b><small>Sales, Fred Haas Nissan · Tomball, TX</small></div><a href="sms:+18326202855">Text 832-620-2855</a></header>
+<main class="wrap">
+  <div class="box">
+    <div id="menu">
+      <h1 id="carT">Interested in a vehicle?</h1>
+      <p class="stk" id="carS">Pick an option below and I'll get right back to you.</p>
+      <button class="btn p" data-t="avail">Confirm Availability</button>
+      <button class="btn o" data-t="drive">Schedule a Test Drive</button>
+      <button class="btn o" data-t="trade">Get Your Trade-In Value</button>
+      <a class="btn g" href="tel:+18326202855">Call Daniel · 832-620-2855</a>
+      <p class="es">🇲🇽 ¿Habla español? ¡Yo también! Llene el formulario o mándeme un texto al <a href="sms:+18326202855">832-620-2855</a>.</p>
+    </div>
+
+    <form id="f" novalidate autocomplete="on">
+      <button type="button" class="back" id="back">← Back</button>
+      <h1 id="fT"></h1>
+      <p class="stk" id="fS"></p>
+      <label for="name">Name *</label><input id="name" name="name" required autocomplete="name" maxlength="60">
+      <label for="phone">Mobile phone *</label><input id="phone" name="phone" type="tel" required autocomplete="tel" inputmode="tel" maxlength="20" placeholder="(281) 555-0123">
+      <label for="email">Email (optional)</label><input id="email" name="email" type="email" autocomplete="email" maxlength="80">
+      <label for="car">Which vehicle?</label><input id="car" name="car" maxlength="80" placeholder="e.g. 2026 Pathfinder SL">
+      <div id="whenBox">
+        <div class="row">
+          <div><label for="date">Preferred day</label><select id="date" name="date"></select></div>
+          <div><label for="time">Time</label><select id="time" name="time"></select></div>
+        </div>
+      </div>
+      <div id="tradeBox">
+        <div class="row">
+          <div><label for="tyear">Trade year</label><input id="tyear" name="tyear" inputmode="numeric" maxlength="4" placeholder="2018"></div>
+          <div><label for="tmiles">Miles</label><input id="tmiles" name="tmiles" inputmode="numeric" maxlength="9" placeholder="85,000"></div>
+        </div>
+        <div class="row">
+          <div><label for="tmake">Make</label><input id="tmake" name="tmake" maxlength="25" placeholder="Honda"></div>
+          <div><label for="tmodel">Model</label><input id="tmodel" name="tmodel" maxlength="30" placeholder="Accord"></div>
+        </div>
+      </div>
+      <label for="notes">Anything else? (optional)</label><textarea id="notes" name="notes" rows="2" maxlength="200"></textarea>
+      <label style="font-weight:400"><input type="checkbox" id="es" style="width:auto"> Prefiero español</label>
+      <input class="hp" type="text" name="website" id="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <button class="btn p" type="submit" id="sb">Send</button>
+      <div class="err" id="err"></div>
+      <p class="fine">Your info goes only to Daniel and is used just to reply to this request. Sales hours start at 9:00 AM.</p>
+    </form>
+
+    <div class="ok" id="ok">
+      <h2>Got it! ✔</h2>
+      <p>Thanks! I'll reach out shortly to confirm. Need me faster? Text or call <a href="sms:+18326202855">832-620-2855</a>.</p>
+      <p>¡Gracias! Le contacto muy pronto.</p>
+      <button class="btn o" id="again">Back to options</button>
+    </div>
+  </div>
+  <p class="who">Daniel Quintanilla, Sales Professional at Fred Haas Nissan, 24202 Highway 249, Tomball, TX 77375.</p>
+</main>
+<footer>Personal page of Daniel Quintanilla. Prices and availability change quickly; every request is confirmed by Daniel personally.</footer>
+<script>
+(function(){
+  var q=new URLSearchParams(location.search), car=(q.get('car')||'').slice(0,80), stock=(q.get('stock')||'').slice(0,20).toUpperCase();
+  var $=function(i){return document.getElementById(i)}, type='avail', opened=0;
+  var T={avail:['Confirm Availability','Send'],drive:['Schedule a Test Drive','Request test drive'],trade:['Get Your Trade-In Value','Get my value']};
+  if(car){$('carT').textContent=car;$('carS').textContent=(stock?'Stock # '+stock+' · ':'')+'Is it still here? Want to drive it? Tap below.';$('car').value=car;}
+  document.title=(car?car+' | ':'')+'Daniel Quintanilla, Fred Haas Nissan';
+  var D=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  function days(){var s=$('date');s.innerHTML='';var t=new Date();for(var i=0,n=0;n<14&&i<20;i++){var x=new Date(t.getFullYear(),t.getMonth(),t.getDate()+i);if(x.getDay()===0)continue;
+    var o=document.createElement('option');o.value=D[x.getDay()]+' '+M[x.getMonth()]+' '+x.getDate();o.textContent=(i===0?'Today':i===1?'Tomorrow':D[x.getDay()])+', '+M[x.getMonth()]+' '+x.getDate();o.dataset.i=i;s.appendChild(o);n++;}
+    times();}
+  function times(){var s=$('time'),sel=$('date').selectedOptions[0],today=sel&&sel.dataset.i==='0',now=new Date();s.innerHTML='';
+    for(var h=9;h<=19;h++)for(var m=0;m<60;m+=30){if(h===19&&m)continue;if(today&&(h*60+m)<(now.getHours()*60+now.getMinutes()+60))continue;
+      var o=document.createElement('option');o.value=h+':'+(m?'30':'00');o.textContent=((h%12)||12)+':'+(m?'30':'00')+(h<12?' AM':' PM');s.appendChild(o);}
+    if(!s.options.length&&$('date').options.length>1){$('date').remove($('date').selectedIndex);times();}}
+  $('date').addEventListener('change',times);
+  function show(t){type=t;opened=Date.now();$('menu').style.display='none';$('ok').classList.remove('on');$('f').classList.add('on');$('err').classList.remove('on');
+    $('fT').textContent=T[t][0];$('sb').textContent=T[t][1];$('fS').textContent=car?car+(stock?' · Stk '+stock:''):'';
+    $('whenBox').style.display=t==='drive'?'':'none';$('tradeBox').style.display=t==='trade'?'':'none';if(t==='drive')days();window.scrollTo(0,0);}
+  function menu(){$('f').classList.remove('on');$('ok').classList.remove('on');$('menu').style.display='';}
+  document.querySelectorAll('[data-t]').forEach(function(b){b.addEventListener('click',function(){show(b.dataset.t)})});
+  $('back').onclick=menu;$('again').onclick=menu;
+  $('f').addEventListener('submit',function(e){e.preventDefault();var err=$('err'),v=function(i){return $(i).value.trim()};
+    if(!v('name')||v('phone').replace(/\D/g,'').length<10){err.textContent='Please enter your name and a 10-digit phone number.';err.classList.add('on');return;}
+    var d={type:type,name:v('name'),phone:v('phone'),email:v('email'),car:v('car'),stock:stock,notes:v('notes'),website:$('website').value,t:opened,lang:$('es').checked?'es':'',test:q.get('test')||''};
+    if(type==='drive'){d.date=$('date').value;d.time=$('time').value;}
+    if(type==='trade'){d.tyear=v('tyear');d.tmake=v('tmake');d.tmodel=v('tmodel');d.tmiles=v('tmiles');}
+    var sb=$('sb');sb.disabled=true;sb.textContent='Sending…';err.classList.remove('on');
+    fetch('/api/lead',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)}).then(function(r){return r.json().then(function(j){if(!r.ok||!j.ok)throw new Error(j.error||'');})})
+      .then(function(){$('f').classList.remove('on');$('ok').classList.add('on');$('f').reset();if(car)$('car').value=car;window.scrollTo(0,0);})
+      .catch(function(x){err.innerHTML=(x.message&&x.message!=='send failed'&&x.message!=='server error'?x.message+' ':'Sorry, that didn\u2019t go through. ')+'Please text or call Daniel at <a href="sms:+18326202855">832-620-2855</a>.';err.classList.add('on');})
+      .finally(function(){sb.disabled=false;sb.textContent=T[type][1];});});
+})();
+</script>
+</body>
+</html>

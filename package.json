@@ -1,0 +1,9 @@
+{
+  "name": "daniel-booking",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Mobile lead/booking page for Daniel Quintanilla's Marketplace listings. Leads are texted to Daniel.",
+  "main": "server.js",
+  "engines": { "node": ">=18" },
+  "scripts": { "start": "node server.js" }
+}
