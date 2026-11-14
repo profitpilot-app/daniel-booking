@@ -38,12 +38,24 @@ async function sendSms(body) {
       body: new URLSearchParams({ To: TO, From: process.env.TWILIO_FROM, Body: body }) });
     const t = await r.text(); if (!r.ok) throw new Error('twilio ' + r.status + ' ' + t.slice(0, 200)); return 'twilio';
   }
-  const key = process.env.TEXTBELT_KEY || 'textbelt';                // Textbelt ('textbelt' = 1 free/day)
+  if (!process.env.TEXTBELT_KEY) return 'off';                       // no SMS provider configured
+  const key = process.env.TEXTBELT_KEY;                              // Textbelt paid key
   const r = await fetch('https://textbelt.com/text', { method: 'POST', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ phone: TO, message: body, key }) });
   const j = await r.json().catch(() => ({}));
   if (!j.success) throw new Error('textbelt ' + JSON.stringify(j).slice(0, 200));
   return 'textbelt (quota left: ' + j.quotaRemaining + ')';
+}
+
+// ntfy.sh push (topic is a secret env var; never in the repo or the page)
+async function sendNtfy(title, body, phoneDigits) {
+  const topic = process.env.NTFY_TOPIC; if (!topic) return 'off';
+  const tel = 'tel:+1' + phoneDigits.slice(-10);
+  const r = await fetch(process.env.NTFY_SERVER || 'https://ntfy.sh/', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ topic, title, message: body, priority: 4, tags: ['car', 'bell'], click: tel,
+      actions: [{ action: 'view', label: 'Call customer', url: tel, clear: false }, { action: 'view', label: 'Text customer', url: 'sms:+1' + phoneDigits.slice(-10), clear: false }] }) });
+  const t = await r.text(); if (!r.ok) throw new Error('ntfy ' + r.status + ' ' + t.slice(0, 200));
+  return 'ok';
 }
 
 // Optional email backup through FormSubmit (address already activated on Daniel's other page)
@@ -53,8 +65,8 @@ async function sendEmailBackup(fields, subject) {
   const r = await fetch('https://formsubmit.co/ajax/' + to, { method: 'POST',
     headers: { 'Content-Type': 'application/json', Accept: 'application/json', Origin: site, Referer: site + '/' },
     body: JSON.stringify(Object.assign({ _subject: subject, _template: 'table' }, fields)) });
-  const j = await r.json().catch(() => ({}));
-  if (!(j.success === true || j.success === 'true')) throw new Error('formsubmit ' + JSON.stringify(j).slice(0, 200));
+  const t = await r.text(); let j = {}; try { j = JSON.parse(t); } catch {}
+  if (!(j.success === true || j.success === 'true')) throw new Error('formsubmit ' + r.status + ' ' + t.replace(/\s+/g, ' ').slice(0, 300));
   return 'ok';
 }
 
@@ -90,14 +102,17 @@ async function handleLead(req, res, raw) {
   const body = lines.join('\n');
 
   console.log('[lead]', new Date().toISOString(), JSON.stringify({ ip, body }));
-  const [sms, mail] = await Promise.allSettled([sendSms(body), sendEmailBackup(
+  const title = `${test}${type === 'drive' ? 'Test Drive request' : type === 'trade' ? 'Trade-In request' : 'Availability check'}: ${name}`;
+  const [sms, mail, push] = await Promise.allSettled([sendSms(body), sendEmailBackup(
     { 'Request type': TYPES[type], Name: name, Phone: fmtPhone, Email: email, Vehicle: car, 'Stock #': stock, Time: when, Trade: trade, Notes: notes },
-    `${test}${TYPES[type]}: ${car || 'vehicle'} - ${name}`)]);
-  console.log('[delivery] sms=', sms.status === 'fulfilled' ? sms.value : sms.reason.message, ' email=', mail.status === 'fulfilled' ? mail.value : mail.reason.message);
-  lastDelivery = { at: new Date().toISOString(), sms: sms.status === 'fulfilled' ? sms.value : 'FAILED: ' + sms.reason.message, email: mail.status === 'fulfilled' ? mail.value : 'FAILED: ' + mail.reason.message };
-  const delivered = sms.status === 'fulfilled' || (mail.status === 'fulfilled' && mail.value === 'ok');
-  if (!delivered) return json(res, 502, { ok: false, error: 'send failed' });
-  json(res, 200, { ok: true, sms: sms.status === 'fulfilled' });
+    `${test}${TYPES[type]}: ${car || 'vehicle'} - ${name}`), sendNtfy(title, body, digits)]);
+  const st = x => x.status === 'fulfilled' ? x.value : 'FAILED: ' + x.reason.message;
+  lastDelivery = { at: new Date().toISOString(), sms: st(sms), email: st(mail), ntfy: st(push) };
+  console.log('[delivery]', JSON.stringify(lastDelivery));
+  const ok = x => x.status === 'fulfilled' && x.value !== 'off';
+  const emailed = ok(mail);
+  if (!ok(sms) && !emailed && !ok(push)) return json(res, 502, { ok: false, error: 'send failed', emailed: false });
+  json(res, 200, { ok: true, emailed });
 }
 
 function json(res, code, obj) { res.writeHead(code, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }); res.end(JSON.stringify(obj)); }
@@ -110,7 +125,7 @@ http.createServer((req, res) => {
     req.on('end', () => handleLead(req, res, raw).catch(e => { console.error(e); json(res, 500, { ok: false, error: 'server error' }); }));
     return;
   }
-  if (url.pathname === '/healthz') return json(res, 200, { ok: true, provider: process.env.QUO_API_KEY ? 'quo' : process.env.TWILIO_SID ? 'twilio' : 'textbelt', lastDelivery });
+  if (url.pathname === '/healthz') return json(res, 200, { ok: true, sms: process.env.QUO_API_KEY ? 'quo' : process.env.TWILIO_SID ? 'twilio' : process.env.TEXTBELT_KEY ? 'textbelt' : 'off', ntfy: !!process.env.NTFY_TOPIC, email: !!process.env.BACKUP_EMAIL, lastDelivery });
   let p = url.pathname === '/' ? '/index.html' : url.pathname;
   const file = path.normalize(path.join(PUB, p));
   if (!file.startsWith(PUB)) { res.writeHead(403); return res.end(); }
