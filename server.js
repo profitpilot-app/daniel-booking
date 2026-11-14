@@ -11,6 +11,7 @@ const TYPES = { avail: 'Confirm Availability', drive: 'Schedule a Test Drive', t
 
 // ---------- spam protection: per-IP + global rate limits ----------
 const hits = new Map(); let globalHits = [];
+let lastDelivery = null; // non-secret status of the most recent send, shown on /healthz
 function limited(ip) {
   const now = Date.now(), hour = 3600e3;
   globalHits = globalHits.filter(t => now - t < hour);
@@ -93,6 +94,7 @@ async function handleLead(req, res, raw) {
     { 'Request type': TYPES[type], Name: name, Phone: fmtPhone, Email: email, Vehicle: car, 'Stock #': stock, Time: when, Trade: trade, Notes: notes },
     `${test}${TYPES[type]}: ${car || 'vehicle'} - ${name}`)]);
   console.log('[delivery] sms=', sms.status === 'fulfilled' ? sms.value : sms.reason.message, ' email=', mail.status === 'fulfilled' ? mail.value : mail.reason.message);
+  lastDelivery = { at: new Date().toISOString(), sms: sms.status === 'fulfilled' ? sms.value : 'FAILED: ' + sms.reason.message, email: mail.status === 'fulfilled' ? mail.value : 'FAILED: ' + mail.reason.message };
   const delivered = sms.status === 'fulfilled' || (mail.status === 'fulfilled' && mail.value === 'ok');
   if (!delivered) return json(res, 502, { ok: false, error: 'send failed' });
   json(res, 200, { ok: true, sms: sms.status === 'fulfilled' });
@@ -108,7 +110,7 @@ http.createServer((req, res) => {
     req.on('end', () => handleLead(req, res, raw).catch(e => { console.error(e); json(res, 500, { ok: false, error: 'server error' }); }));
     return;
   }
-  if (url.pathname === '/healthz') return json(res, 200, { ok: true });
+  if (url.pathname === '/healthz') return json(res, 200, { ok: true, provider: process.env.QUO_API_KEY ? 'quo' : process.env.TWILIO_SID ? 'twilio' : 'textbelt', lastDelivery });
   let p = url.pathname === '/' ? '/index.html' : url.pathname;
   const file = path.normalize(path.join(PUB, p));
   if (!file.startsWith(PUB)) { res.writeHead(403); return res.end(); }
