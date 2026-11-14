@@ -118,7 +118,23 @@ footer{text-align:center;font-size:12px;color:#777;padding:10px 16px 30px}footer
     var sb=$('sb');sb.disabled=true;sb.textContent='Sending…';err.classList.remove('on');
     function backup(){var b={_subject:T[type][0]+': '+(d.car||'vehicle')+' - '+d.name,_template:'table','Request type':T[type][0],Name:d.name,Phone:d.phone,Email:d.email,Vehicle:d.car,'Stock #':d.stock,Day:d.date||'',Time:$('time').selectedOptions[0]&&type==='drive'?$('time').selectedOptions[0].textContent:'',Trade:[d.tyear,d.tmake,d.tmodel,d.tmiles?d.tmiles+' mi':''].filter(Boolean).join(' '),Notes:d.notes,Spanish:d.lang?'yes':''};
       return fetch('https://formsubmit.co/ajax/dannyinhouston@yahoo.com',{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/json'},body:JSON.stringify(b)}).then(function(r){return r.json()}).then(function(j){if(!(j.success===true||j.success==='true'))throw new Error('send failed');});}
-    fetch('/api/lead',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)}).then(function(r){return r.json().then(function(j){if(j.ok){if(j.emailed===false)return backup().catch(function(){});return;}if(r.status===502)return backup();throw new Error(j.error||'');})})
+    var dg=d.phone.replace(/\D/g,'').slice(-10),fp=dg.slice(0,3)+'-'+dg.slice(3,6)+'-'+dg.slice(6),tst=d.test==='TEST'?'TEST - ':'',TY={avail:'Confirm Availability',drive:'Schedule a Test Drive',trade:'Trade-In Value'};
+    var tm=type==='drive'&&$('time').selectedOptions[0]?$('time').selectedOptions[0].textContent:'',tr=type==='trade'?([d.tyear,d.tmake,d.tmodel].filter(Boolean).join(' ')+(d.tmiles?', '+d.tmiles+' mi':'')):'';
+    var L=[tst+'New lead: '+TY[type],'Name: '+d.name,'Phone: '+fp];if(d.email)L.push('Email: '+d.email);L.push('Vehicle: '+(d.car||'not specified')+(d.stock?' (Stk '+d.stock+')':''));
+    if(tm)L.push('Time: '+d.date+' '+tm);if(tr.trim())L.push('Trade: '+tr);if(d.lang)L.push('Prefers Spanish');if(d.notes)L.push('Note: '+d.notes);
+    var title=tst+(type==='drive'?'Test Drive request':type==='trade'?'Trade-In request':'Availability check')+': '+d.name;
+    // Push to Daniel's phone from the customer's browser (anonymous ntfy.sh publish; no token here). Simple CORS request: text body + query params.
+    function push(){if(d.website||Date.now()-opened<2500)return Promise.resolve(false);
+      var qs='title='+encodeURIComponent(title)+'&priority=high&tags=car,bell&click='+encodeURIComponent('tel:+1'+dg)+'&actions='+encodeURIComponent('view, Call customer, tel:+1'+dg+'; view, Text customer, sms:+1'+dg);
+      return fetch('https://ntfy.sh/daniel-fhn-bookings-2a718ee5628a16ba1d166c71?'+qs,{method:'POST',body:L.join('\n')}).then(function(r){return r.ok}).catch(function(){return false});}
+    var pushed=false;
+    push().then(function(p){pushed=p;d.pushed=p;
+      return fetch('/api/lead',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)}).then(function(r){return r.json().catch(function(){return {}}).then(function(j){j._s=r.status;return j})},function(){return {_s:0}});})
+    .then(function(j){
+      if(!pushed&&(j._s===400||j._s===429))throw new Error(j.error||'');
+      var ok=pushed||j.notified===true;
+      if(j.emailed===true)return;                     // server already emailed: no browser email (no duplicates)
+      return backup().then(function(){},function(){if(!ok)throw new Error('send failed');});})
       .then(function(){$('f').classList.remove('on');$('ok').classList.add('on');$('f').reset();if(car)$('car').value=car;window.scrollTo(0,0);})
       .catch(function(x){err.innerHTML=(x.message&&x.message!=='send failed'&&x.message!=='server error'?x.message+' ':'Sorry, that didn\u2019t go through. ')+'Please text or call Daniel at <a href="sms:+18326202855">832-620-2855</a>.';err.classList.add('on');})
       .finally(function(){sb.disabled=false;sb.textContent=T[type][1];});});

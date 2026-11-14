@@ -106,14 +106,15 @@ async function handleLead(req, res, raw) {
   const title = `${test}${type === 'drive' ? 'Test Drive request' : type === 'trade' ? 'Trade-In request' : 'Availability check'}: ${name}`;
   const [sms, mail, push] = await Promise.allSettled([sendSms(body), sendEmailBackup(
     { 'Request type': TYPES[type], Name: name, Phone: fmtPhone, Email: email, Vehicle: car, 'Stock #': stock, Time: when, Trade: trade, Notes: notes },
-    `${test}${TYPES[type]}: ${car || 'vehicle'} - ${name}`), sendNtfy(title, body, digits)]);
+    `${test}${TYPES[type]}: ${car || 'vehicle'} - ${name}`), (d.pushed === true ? Promise.resolve('skipped (browser push sent)') : sendNtfy(title, body, digits))]);
   const st = x => x.status === 'fulfilled' ? x.value : 'FAILED: ' + x.reason.message;
   lastDelivery = { at: new Date().toISOString(), sms: st(sms), email: st(mail), ntfy: st(push) };
   console.log('[delivery]', JSON.stringify(lastDelivery));
   const ok = x => x.status === 'fulfilled' && x.value !== 'off';
   const emailed = ok(mail);
-  if (!ok(sms) && !emailed && !ok(push)) return json(res, 502, { ok: false, error: 'send failed', emailed: false });
-  json(res, 200, { ok: true, emailed });
+  const notified = ok(sms) || (push.status === 'fulfilled' && push.value === 'ok');
+  if (!notified && !emailed && d.pushed !== true) return json(res, 502, { ok: false, error: 'send failed', emailed: false, notified: false });
+  json(res, 200, { ok: true, emailed, notified });
 }
 
 function json(res, code, obj) { res.writeHead(code, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }); res.end(JSON.stringify(obj)); }
