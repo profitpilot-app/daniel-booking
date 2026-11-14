@@ -13,6 +13,6 @@ Optional: `BACKUP_EMAIL` (FormSubmit email copy), `SITE_URL`, `NOTIFY_TO`, `PER_
 Spam: honeypot field, 2.5s minimum fill time, per-IP and global hourly rate limits. Leads are also logged in Render logs.
 
 ## Current status
-Alerts: ntfy.sh push (env `NTFY_TOPIC`, private, set only on Render) + email to dannyinhouston@yahoo.com
+Alerts: ntfy.sh push (env `NTFY_TOPIC`, private, set only on Render; optional `NTFY_TOKEN` access token so Render's shared IP doesn't hit ntfy's anonymous daily limit) + email to dannyinhouston@yahoo.com
 (server-side FormSubmit via `BACKUP_EMAIL`; if the server email fails, the browser sends the same email once as a fallback).
 SMS is off unless a provider key is set. `/healthz` shows the last delivery result (no secrets).

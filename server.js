@@ -51,7 +51,8 @@ async function sendSms(body) {
 async function sendNtfy(title, body, phoneDigits) {
   const topic = process.env.NTFY_TOPIC; if (!topic) return 'off';
   const tel = 'tel:+1' + phoneDigits.slice(-10);
-  const r = await fetch(process.env.NTFY_SERVER || 'https://ntfy.sh/', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+  const r = await fetch(process.env.NTFY_SERVER || 'https://ntfy.sh/', { method: 'POST',
+    headers: Object.assign({ 'Content-Type': 'application/json' }, process.env.NTFY_TOKEN ? { Authorization: 'Bearer ' + process.env.NTFY_TOKEN } : {}),
     body: JSON.stringify({ topic, title, message: body, priority: 4, tags: ['car', 'bell'], click: tel,
       actions: [{ action: 'view', label: 'Call customer', url: tel, clear: false }, { action: 'view', label: 'Text customer', url: 'sms:+1' + phoneDigits.slice(-10), clear: false }] }) });
   const t = await r.text(); if (!r.ok) throw new Error('ntfy ' + r.status + ' ' + t.slice(0, 200));
