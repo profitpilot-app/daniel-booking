@@ -1,5 +1,5 @@
 # daniel-booking
-Mobile lead page for Daniel Quintanilla (Fred Haas Nissan, Tomball) linked from Facebook Marketplace listings.
+Mobile lead page for Daniel Quintanilla (Tomball, TX) linked from Facebook Marketplace listings.
 Three buttons: Confirm Availability, Schedule a Test Drive (9 AM or later, Mon-Sat), Get Your Trade-In Value.
 Every submission is texted to Daniel's cell (+18326202855) by `server.js` (`POST /api/lead`).
 
